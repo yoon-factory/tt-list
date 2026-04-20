@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <style>
+        /* Basic Reset & Body Styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            margin: 0;
+            padding: 24px 16px 40px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            color: #e0e0e0;
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            background-color: #2c1a1a;
+            border: 1px solid #662222;
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .todo-container {
+            background-color: #1e1e1e;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            width: min(calc(100% - 48px), 750px);
+            margin-top: 30px;
+            margin-bottom: 24px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #333;
+        }
+
+        .fixed-header {
+            background-color: #1e1e1e;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            width: min(calc(100% - 48px), 750px);
+            margin: 0 auto;
+            padding: 16px 24px 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #333;
+        }
+
+        h1 {
+            color: #4da3ff;
+            margin-bottom: 25px;
+            font-size: 2em;
+            text-align: center;
+        }
+
+        .clock-title {
+            margin: 0 0 12px;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4da3ff;
+            letter-spacing: 0.04em;
+            text-align: center;
+        }
+
+        /* Progress Bar Styling */
+        .progress-info {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 2px;
+        }
+
+        #progress-count {
+            font-size: 0.85em;
+            color: #bbb;
+            font-weight: bold;
+        }
+
+        .progress-section {
+            width: 100%;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            height: 10px;
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #03dac6;
+            border-radius: 5px;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px rgba(3, 218, 198, 0.5);
+        }
+
+        #progress-text {
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #03dac6;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        /* Group Panel Styling */
+        .group-panel {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 14px;
+            justify-content: center;
+        }
+
+        .group-btn {
+            padding: 8px 15px;
+            background-color: #2a2a2a;
+            color: #bbb;
+            border: 1px solid #444;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .group-btn.active {
+            background-color: #4da3ff;
+            color: #000;
+            border-color: #4da3ff;
+        }
+
+        .group-btn:hover:not(.active) {
+            background-color: #333;
+            border-color: #666;
+        }
+
+        .group-action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 5px; /* 버튼 사이 간격 */
+            margin-left: 10px; /* 그룹 탭과의 간격 */
+        }
+
+        .group-panel button {
+            /* 그룹 패널 내 모든 버튼의 기본 스타일 */
+            padding: 8px 15px;
+            background-color: #2a2a2a; /* 주변 톤에 맞게 어두운 배경 */
+            color: #bbb; /* 밝은 글자색 */
+            border: 1px solid #444;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .group-panel button:hover {
+            background-color: #333;
+            border-color: #666;
+        }
+
+        /* 특정 버튼에 대한 오버라이드 (예: 그룹 추가/제거 버튼의 색상) */
+        #add-group-btn {
+            background-color: #4da3ff; /* 파란색 계열 */
+            color: #000;
+            border-color: #4da3ff;
+        }
+        #add-group-btn:hover {
+            background-color: #82bfff;
+            border-color: #82bfff;
+        }
+
+        #remove-group-btn {
+            background-color: #cf6679; /* 붉은색 계열 */
+            color: #000;
+            border-color: #cf6679;
+        }
+        #remove-group-btn:hover {
+            background-color: #ff7597;
+            border-color: #ff7597;
+        }
+
+        .group-edit-input {
+            padding: 8px 15px;
+            background-color: #2a2a2a;
+            color: #bbb;
+            border: 1px solid #4da3ff; /* 활성화된 탭과 유사한 테두리 */
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            text-align: center;
+            box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+            max-width: 150px; /* 적당한 최대 너비 설정 */
+        }
+
+        .group-edit-input:focus {
+            outline: none;
+            border-color: #03dac6; /* 포커스 시 색상 변경 */
+        }
+
+        #add-todo-btn {
+            min-width: 96px;
+            height: 48px;
+            padding: 0 20px;
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        .trash-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .trash-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .trash-toolbar button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.82em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            color: #000;
+        }
+
+        #backup-btn {
+            background-color: #4da3ff;
+        }
+
+        #backup-btn:hover {
+            background-color: #82bfff;
+        }
+
+        #restore-btn {
+            background-color: #03dac6;
+        }
+
+        #restore-btn:hover {
+            background-color: #47e4d6;
+        }
+
+        .input-section {
+            display: flex;
+            width: 100%;
+            margin-bottom: 0;
+            gap: 10px;
+        }
+
+        #todo-input {
+            flex-grow: 1;
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 6px;
+            font-size: 1em;
+            color: #fff;
+            box-sizing: border-box;
+        }
+
+        #todo-input::placeholder { color: #666; }
+        #todo-input:focus { outline: none; border-color: #4da3ff; }
+
+        #add-todo-btn {
+            background-color: #4da3ff;
+        }
+
+        #add-todo-btn:hover { background-color: #82bfff; }
+
+        #todo-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+
+        .todo-item {
+            background-color: #252525;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .todo-item:hover { background-color: #2d2d2d; border-color: #444; }
+
+        .todo-item.completed { background-color: #1a1a1a; opacity: 0.6; }
+        .todo-item.completed .todo-item-text { text-decoration: line-through; color: #777; }
+        .todo-item.selected-for-delete {
+            background-color: #4a2f2f;
+            border-color: #a05f5f;
+            box-shadow: 0 0 0 1px rgba(160, 95, 95, 0.35), 0 8px 18px rgba(0, 0, 0, 0.28);
+        }
+        .todo-item.selected-for-delete:hover {
+            background-color: #553535;
+            border-color: #b46b6b;
+        }
+        .todo-item.selected-for-delete .todo-item-text {
+            color: #ffd1d1;
+            font-weight: 700;
+        }
+
+        .todo-item.selected-for-delete .todo-item-datetime {
+            color: #ffd1d1;
+            font-weight: 800;
+            font-size: 1em;
+        }
+
+        .todo-item.completed {
+            background-color: #17332d;
+            border-color: #03dac6;
+            box-shadow: 0 0 0 1px rgba(3, 218, 198, 0.18), 0 8px 18px rgba(0, 0, 0, 0.22);
+        }
+
+        .todo-item.completed:hover {
+            background-color: #1a3f38;
+            border-color: #47e4d6;
+        }
+
+        .todo-item.completed .todo-item-text,
+        .todo-item.completed .todo-item-datetime {
+            color: #aef6ee;
+        }
+
+        .todo-item-content {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            /* margin-right: 10px; 제거 */
+        }
+
+        .todo-item input[type="checkbox"] {
+            margin-right: 15px;
+            cursor: pointer;
+            transform: scale(1.2);
+            accent-color: #4da3ff;
+        }
+
+        .edit-input {
+            flex-grow: 1;
+            padding: 8px 0;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #4da3ff;
+            font-size: 1.1em;
+            color: #fff;
+            outline: none;
+        }
+
+        .confirm-edit-btn {
+            padding: 5px 10px;
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .confirm-edit-btn:hover {
+            background-color: #474747;
+            border-color: #777;
+        }
+
+        .todo-item-text { font-size: 1.1em; word-break: break-word; color: #e0e0e0; }
+        .todo-item-datetime { font-size: 0.8em; color: #888; margin-left: auto; white-space: nowrap; padding-right: 10px; /* 수정 버튼과의 간격 */}
+
+        .todo-item-actions { display: flex; gap: 8px; flex-shrink: 0; margin-left: auto; /* 우측으로 정렬 */}
+        .todo-item-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .completed-container,
+        .trash-container {
+            background-color: #1e1e1e;
+            border-radius: 12px;
+            width: min(calc(100% - 48px), 750px);
+            margin: 0 auto 24px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #333;
+        }
+
+        .trash-container {
+            margin: auto auto 0;
+        }
+
+        .completed-container h2,
+        .trash-container h2 {
+            color: #888;
+            margin-bottom: 12px;
+            font-size: 1.5em;
+        }
+
+        .trash-container h2 {
+            cursor: pointer;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0;
+            transition: color 0.2s ease;
+        }
+
+        .trash-container.collapsed #trash-list,
+        .trash-container.collapsed .trash-toolbar {
+            display: none;
+        }
+
+        .trash-container.collapsed h2 {
+            margin-bottom: 0;
+        }
+
+        #completed-list, #trash-list { list-style: none; padding: 0; margin: 0; width: 100%; }
+
+        .no-todo-item,
+        .no-trash-item {
+            padding: 18px 16px;
+            border-radius: 8px;
+            border: 1px dashed #3a3a3a;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            color: #8a8a8a;
+            text-align: center;
+            font-size: 0.92em;
+            letter-spacing: 0.01em;
+            line-height: 1.5;
+        }
+
+        .no-trash-item {
+            border-style: solid;
+            border-color: #2f2f2f;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        }
+
+        .completed-item,
+        .trash-item {
+            background-color: #252525;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            box-sizing: border-box;
+            color: #666;
+            text-decoration: line-through;
+        }
+
+        .completed-item-text,
+        .trash-item-text { flex-grow: 1; font-size: 0.95em; word-break: break-word; margin-right: 10px; }
+        .completed-item-actions button,
+        .trash-item-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .trash-item-actions .permanent-delete-btn { color: #cf6679; }
+        .trash-item-actions .permanent-delete-btn:hover { background-color: rgba(207, 102, 121, 0.1); }
+        .completed-item-actions .move-to-trash-btn { color: #cf6679; }
+        .completed-item-actions .move-to-trash-btn:hover { background-color: rgba(207, 102, 121, 0.1); }
+        .completed-item-actions .restore-btn { color: #03dac6; }
+        .completed-item-actions .restore-btn:hover { background-color: rgba(3, 218, 198, 0.1); }
+
+        #clear-trash-btn {
+            padding: 10px 15px;
+            background-color: #cf6679;
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-top: 0;
+        }
+
+        @media (max-width: 600px) {
+            .todo-item, .completed-item, .trash-item { flex-direction: column; align-items: flex-start; }
+            .todo-item-actions, .completed-item-actions, .trash-item-actions { width: 100%; justify-content: flex-end; margin-top: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="fixed-header">
+        <div class="clock-title" id="clock-title">00시 00분 00:00</div>
+        <div class="progress-info">
+            <span id="progress-count">0 / 0</span>
+        </div>
+        <div class="progress-section">
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <span id="progress-text">0% 완료</span>
+        </div>
+        <div class="group-panel" id="group-panel">
+
+
+            <div class="group-action-buttons">
+                <button id="add-group-btn">+ 그룹 추가</button>
+                <button id="remove-group-btn">- 그룹 제거</button>
+            </div>
+        </div>
+        <div class="input-section">
+            <input type="text" id="todo-input" placeholder="새로운 할 일 추가...">
+            <button id="add-todo-btn">추가</button>
+        </div>
+    </div>
+
+    <div class="todo-container">
+        <ul id="todo-list"></ul>
+    </div>
+
+    <div class="completed-container">
+        <h2>완료 보관함</h2>
+        <ul id="completed-list"></ul>
+    </div>
+
+    <div class="trash-container collapsed">
+        <h2>휴지통 목록</h2>
+        <ul id="trash-list"></ul>
+        <div class="trash-toolbar">
+            <div class="trash-actions">
+                <button id="backup-btn" type="button">백업</button>
+                <button id="restore-btn" type="button">복원</button>
+            </div>
+            <button id="clear-trash-btn">모두 비우기</button>
+        </div>
+    </div>
+
+        <script src="app.js"></script>
+</body>
+</html>
+
+
