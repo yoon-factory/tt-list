@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const progressText = document.getElementById('progress-text');
             const progressCount = document.getElementById('progress-count');
             const clockTitle = document.getElementById('clock-title');
+            const moveGroupLeftBtn = document.getElementById('move-group-left-btn');
+            const moveGroupRightBtn = document.getElementById('move-group-right-btn');
             const restoreFileInput = document.createElement('input');
             restoreFileInput.type = 'file';
             restoreFileInput.accept = 'application/json,.json';
@@ -63,6 +65,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!trashContainer || !trashTitle) return;
                 trashContainer.classList.toggle('collapsed', collapsed);
                 trashTitle.setAttribute('aria-expanded', String(!collapsed));
+            };
+
+            const moveCurrentGroup = (offset) => {
+                const currentIndex = groups.findIndex(group => group.id === currentGroupId);
+                const targetIndex = currentIndex + offset;
+                if (currentIndex < 0 || targetIndex < 0 || targetIndex >= groups.length) return;
+                const [moved] = groups.splice(currentIndex, 1);
+                groups.splice(targetIndex, 0, moved);
+                setGroups();
+                renderAll();
+            };
+
+            const updateGroupMoveButtons = () => {
+                if (!moveGroupLeftBtn || !moveGroupRightBtn) return;
+                const currentIndex = groups.findIndex(group => group.id === currentGroupId);
+                moveGroupLeftBtn.disabled = currentIndex <= 0;
+                moveGroupRightBtn.disabled = currentIndex < 0 || currentIndex >= groups.length - 1;
             };
 
             const buildBackupPayload = () => ({
@@ -504,6 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const renderAll = () => {
                 ensureGroups();
                 renderGroups();
+                updateGroupMoveButtons();
                 renderTodoList();
                 renderCompletedList();
                 renderTrash();
@@ -603,6 +623,12 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             // 그룹 버튼 이벤트
+            if (moveGroupLeftBtn) {
+                moveGroupLeftBtn.onclick = () => moveCurrentGroup(-1);
+            }
+            if (moveGroupRightBtn) {
+                moveGroupRightBtn.onclick = () => moveCurrentGroup(1);
+            }
             const addGroupBtn = document.getElementById('add-group-btn');
             const removeGroupBtn = document.getElementById('remove-group-btn');
             addGroupBtn.onclick = () => {
