@@ -124,22 +124,27 @@
         /* Group Panel Styling */
         .group-panel {
             display: flex;
-            gap: 10px;
+            gap: 16px;
             width: 100%;
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             justify-content: center;
         }
 
         .group-btn {
-            padding: 8px 15px;
+            padding: 4px 12px;
             background-color: #2a2a2a;
             color: #bbb;
             border: 1px solid #444;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 0.9em;
+            font-size: 0.82em;
             font-weight: bold;
             transition: all 0.3s ease;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
         }
 
         .group-btn.active {
@@ -160,7 +165,7 @@
             margin-left: 10px; /* 그룹 탭과의 간격 */
         }
 
-        .group-panel button {
+        .group-action-buttons button {
             /* 그룹 패널 내 모든 버튼의 기본 스타일 */
             padding: 8px 15px;
             background-color: #2a2a2a; /* 주변 톤에 맞게 어두운 배경 */
@@ -173,7 +178,7 @@
             transition: all 0.3s ease;
         }
 
-        .group-panel button:hover {
+        .group-action-buttons button:hover {
             background-color: #333;
             border-color: #666;
         }

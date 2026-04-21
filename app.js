@@ -622,11 +622,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 const currentTodo = getTodoTasksForCurrentGroup();
-                const currentTrash = getTrashTasksForCurrentGroup();
-                if (currentTodo.length > 0 || currentTrash.length > 0) {
+                if (currentTodo.length > 0) {
                     displayErrorMessage('그룹에 할 일이 남아있으면 삭제할 수 없습니다.');
                     return;
                 }
+                completedTasks = completedTasks.filter(task => task.groupId !== currentGroupId);
+                deletedTasks = deletedTasks.filter(task => task.groupId !== currentGroupId);
+                setCompletedTasks(completedTasks);
+                setTrashTasks(deletedTasks);
                 groups = groups.filter(group => group.id !== currentGroupId);
                 currentGroupId = groups[0].id;
                 setGroups();
