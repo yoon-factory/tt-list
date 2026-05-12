@@ -283,6 +283,7 @@
             flex-shrink: 0;
         }
 
+        .completed-toolbar,
         .trash-toolbar {
             display: flex;
             justify-content: space-between;
@@ -292,12 +293,18 @@
             margin-top: 15px;
         }
 
+        .completed-toolbar {
+            justify-content: flex-end;
+        }
+
+        .completed-actions,
         .trash-actions {
             display: flex;
             gap: 8px;
             align-items: center;
         }
 
+        .completed-toolbar button,
         .trash-toolbar button {
             padding: 8px 12px;
             border: none;
@@ -315,6 +322,14 @@
 
         #backup-btn:hover {
             background-color: #82bfff;
+        }
+
+        #move-all-completed-to-trash-btn {
+            background-color: #cf6679;
+        }
+
+        #move-all-completed-to-trash-btn:hover {
+            background-color: #ff7597;
         }
 
         #restore-btn {
@@ -623,6 +638,11 @@
     <div class="completed-container">
         <h2>완료 보관함</h2>
         <ul id="completed-list"></ul>
+        <div class="completed-toolbar">
+            <div class="completed-actions">
+                <button id="move-all-completed-to-trash-btn" type="button">휴지통 보내기</button>
+            </div>
+        </div>
     </div>
 
     <div class="trash-container collapsed">

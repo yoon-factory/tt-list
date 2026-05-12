@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const addTodoBtn = document.getElementById('add-todo-btn');
             const todoList = document.getElementById('todo-list');
             const completedList = document.getElementById('completed-list');
+            const moveAllCompletedToTrashBtn = document.getElementById('move-all-completed-to-trash-btn');
             const trashList = document.getElementById('trash-list');
             const clearTrashBtn = document.getElementById('clear-trash-btn');
             const backupBtn = document.getElementById('backup-btn');
@@ -252,6 +253,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTrashTasks(deletedTasks);
             };
 
+            const moveAllCompletedItemsToTrashList = () => {
+                const items = getCompletedTasksForCurrentGroup();
+                if (items.length === 0) return;
+                const completedIds = new Set(items.map(task => task.id));
+                deletedTasks.push(...items.map(task => ({ ...task })));
+                completedTasks = completedTasks.filter(task => !completedIds.has(task.id));
+                setCompletedTasks(completedTasks);
+                setTrashTasks(deletedTasks);
+            };
+
             const restoreCompletedItemToTodoList = (taskId) => {
                 const index = completedTasks.findIndex(task => task.id === taskId);
                 if (index === -1) return;
@@ -440,6 +451,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const renderCompletedList = () => {
                 completedList.innerHTML = '';
                 const items = getCompletedTasksForCurrentGroup().sort((a, b) => b.id - a.id);
+                if (moveAllCompletedToTrashBtn) {
+                    moveAllCompletedToTrashBtn.style.display = items.length === 0 ? 'none' : 'inline-block';
+                }
                 if (items.length === 0) {
                     const empty = document.createElement('li');
                     empty.className = 'no-todo-item';
@@ -454,17 +468,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     li.innerHTML = `
                         <span class="completed-item-text">${task.text}</span>
                         <span class="todo-item-datetime">${task.date || ''}</span>
-                        <div class="completed-item-actions">
-                            <button type="button" class="move-to-trash-btn">휴지통2</button>
-                        </div>
                     `;
                     li.onclick = (e) => {
                         e.preventDefault();
-                        e.stopPropagation();
-                        moveCompletedItemToTrashList(task.id);
-                        renderAll();
-                    };
-                    li.querySelector('.move-to-trash-btn').onclick = (e) => {
                         e.stopPropagation();
                         moveCompletedItemToTrashList(task.id);
                         renderAll();
@@ -617,10 +623,17 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             clearTrashBtn.onclick = () => {
-                deletedTasks = [];
+                deletedTasks = deletedTasks.filter(task => task.groupId !== currentGroupId);
                 setTrashTasks(deletedTasks);
                 renderAll();
             };
+
+            if (moveAllCompletedToTrashBtn) {
+                moveAllCompletedToTrashBtn.onclick = () => {
+                    moveAllCompletedItemsToTrashList();
+                    renderAll();
+                };
+            }
 
             // 그룹 버튼 이벤트
             if (moveGroupLeftBtn) {
