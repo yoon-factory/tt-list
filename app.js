@@ -336,12 +336,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     countdownTimer = startCountdown(dateElement, Number(task.deleteSelectedAt));
                 }
 
-                checkbox.onchange = (e) => {
+                checkbox.onclick = (e) => {
+                    e.preventDefault();
                     e.stopPropagation();
-                    setTaskState(task.id, (current) => ({
-                        ...current,
-                        completed: checkbox.checked
-                    }));
+                };
+
+                checkbox.onchange = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     renderAll();
                 };
 
