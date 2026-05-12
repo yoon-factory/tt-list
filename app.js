@@ -9,9 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const backupBtn = document.getElementById('backup-btn');
             const restoreBtn = document.getElementById('restore-btn');
             const groupPanel = document.getElementById('group-panel');
+            const inputSection = document.querySelector('.input-section');
+            const completedContainer = document.querySelector('.completed-container');
             const trashContainer = document.querySelector('.trash-container');
             const trashTitle = trashContainer ? trashContainer.querySelector('h2') : null;
             const trashToggleState = trashTitle ? trashTitle.querySelector('.trash-toggle-state') : null;
+            const progressInfo = document.querySelector('.progress-info');
+            const progressSection = document.querySelector('.progress-section');
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
             const progressCount = document.getElementById('progress-count');
@@ -31,6 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const STORAGE_TRASH = 'deletedTasks';
             const STORAGE_GROUPS = 'groups';
             const DEFAULT_GROUP_COUNT = 10;
+            const DASHBOARD_GROUP_ID = 'in-progress';
+            const DASHBOARD_GROUP_NAME = '진행중';
 
             // data
             let nextTodoId = 1;
@@ -47,9 +53,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const setCompletedTasks = (tasks) => localStorage.setItem(STORAGE_COMPLETED, JSON.stringify(tasks));
             const setGroups = () => localStorage.setItem(STORAGE_GROUPS, JSON.stringify(groups));
             const getTaskById = (taskId) => getAllTasks().find(task => task.id === taskId);
+            const isInProgressDashboard = () => currentGroupId === DASHBOARD_GROUP_ID;
+            const getVisibleGroups = () => [{ id: DASHBOARD_GROUP_ID, name: DASHBOARD_GROUP_NAME }, ...groups];
+            const getGroupNameById = (groupId) => {
+                const group = groups.find((item) => item.id === groupId);
+                return group ? group.name : '알 수 없음';
+            };
             const getTodoTasksForCurrentGroup = () => getAllTasks().filter(task => task.groupId === currentGroupId);
             const getCompletedTasksForCurrentGroup = () => completedTasks.filter(task => task.groupId === currentGroupId);
             const getTrashTasksForCurrentGroup = () => deletedTasks.filter(task => task.groupId === currentGroupId);
+            const getInProgressTasksAcrossGroups = () => getAllTasks().filter(task => task.selectedForDelete && !task.completed);
 
             const ensureGroups = () => {
                 if (!Array.isArray(groups) || groups.length === 0) {
@@ -58,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         name: `그룹 ${index + 1}`
                     }));
                 }
-                if (!groups.some(group => group.id === currentGroupId)) {
+                if (currentGroupId !== DASHBOARD_GROUP_ID && !groups.some(group => group.id === currentGroupId)) {
                     currentGroupId = groups[0].id;
                 }
             };
@@ -73,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const moveCurrentGroup = (offset) => {
+                if (isInProgressDashboard()) return;
                 const currentIndex = groups.findIndex(group => group.id === currentGroupId);
                 const targetIndex = currentIndex + offset;
                 if (currentIndex < 0 || targetIndex < 0 || targetIndex >= groups.length) return;
@@ -84,6 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const updateGroupMoveButtons = () => {
                 if (!moveGroupLeftBtn || !moveGroupRightBtn) return;
+                if (isInProgressDashboard()) {
+                    moveGroupLeftBtn.disabled = true;
+                    moveGroupRightBtn.disabled = true;
+                    return;
+                }
                 const currentIndex = groups.findIndex(group => group.id === currentGroupId);
                 moveGroupLeftBtn.disabled = currentIndex <= 0;
                 moveGroupRightBtn.disabled = currentIndex < 0 || currentIndex >= groups.length - 1;
@@ -133,6 +152,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 진행률 계산
             const updateProgressBar = () => {
+                if (isInProgressDashboard()) {
+                    const allTasks = getAllTasks();
+                    const total = allTasks.length + completedTasks.length + deletedTasks.length;
+                    const done = completedTasks.length + deletedTasks.length;
+                    progressCount.textContent = `${done} / ${total}`;
+                    if (total === 0) {
+                        progressBar.style.width = '0%';
+                        progressText.textContent = '0% 완료';
+                        return;
+                    }
+                    const percentage = Math.round((done / total) * 100);
+                    progressBar.style.width = `${percentage}%`;
+                    progressText.textContent = `${percentage}% 완료`;
+                    return;
+                }
                 const allTasks = getAllTasks();
                 const groupTasks = allTasks.filter(task => task.groupId === currentGroupId);
                 const completedCount = groupTasks.filter(task => task.completed).length;
@@ -156,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const renderGroups = () => {
                 Array.from(groupPanel.querySelectorAll('.group-btn, .group-edit-input')).forEach(btn => btn.remove());
                 const actionContainer = document.querySelector('.group-action-buttons');
-                groups.forEach(group => {
+                getVisibleGroups().forEach(group => {
                     const btn = document.createElement('button');
                     btn.className = 'group-btn';
                     if (group.id === currentGroupId) btn.classList.add('active');
@@ -165,6 +199,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         currentGroupId = group.id;
                         renderAll();
                     };
+                    if (group.id === DASHBOARD_GROUP_ID) {
+                        groupPanel.insertBefore(btn, actionContainer);
+                        return;
+                    }
                     btn.ondblclick = (e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -201,6 +239,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (e.key === 'Enter') input.blur();
                     if (e.key === 'Escape') renderAll();
                 };
+            };
+
+            const toggleDashboardSections = () => {
+                const dashboard = isInProgressDashboard();
+                const groupActionButtons = groupPanel ? groupPanel.querySelector('.group-action-buttons') : null;
+                if (inputSection) inputSection.style.display = dashboard ? 'none' : 'flex';
+                if (completedContainer) completedContainer.style.display = dashboard ? 'none' : 'flex';
+                if (trashContainer) trashContainer.style.display = dashboard ? 'none' : 'flex';
+                if (progressInfo) progressInfo.style.display = 'flex';
+                if (progressSection) progressSection.style.display = 'flex';
+                if (groupActionButtons) groupActionButtons.style.display = dashboard ? 'none' : 'flex';
             };
 
             // mutations
@@ -307,15 +356,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 return setInterval(tick, 100);
             };
 
-            const createTodoElement = (task) => {
+            const createTodoElement = (task, options = {}) => {
+                const { dashboardMode = false } = options;
                 const li = document.createElement('li');
                 li.className = 'todo-item';
                 li.dataset.id = task.id;
                 li.dataset.originalDate = task.date || '';
                 if (task.selectedForDelete) li.classList.add('selected-for-delete');
                 if (task.completed) li.classList.add('completed');
+                const groupBadge = dashboardMode ? `<span class="todo-item-group-badge">${getGroupNameById(task.groupId)}</span>` : '';
                 li.innerHTML = `
                     <div class="todo-item-content">
+                        ${groupBadge}
                         <input type="checkbox" class="todo-checkbox" ${task.completed ? 'checked' : ''}>
                         <span class="todo-item-text">${task.text}</span>
                         <span class="todo-item-datetime">${task.date || ''}</span>
@@ -354,6 +406,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     const current = getTaskById(task.id);
                     if (!current) return;
 
+                    if (dashboardMode) {
+                        if (current.selectedForDelete && !current.completed) {
+                            clearCountdown();
+                            setTaskCompleted(task.id);
+                            renderAll();
+                        }
+                        return;
+                    }
+
                     // 3) 완료 -> 완료 보관함
                     if (current.completed) {
                         moveTodoItemToCompletedList(task.id);
@@ -382,6 +443,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const current = getTaskById(task.id);
                     if (!current) return;
+
+                    if (dashboardMode) {
+                        setTaskState(task.id, (currentTask) => ({
+                            ...currentTask,
+                            selectedForDelete: false,
+                            deleteSelectedAt: ''
+                        }));
+                        renderAll();
+                        return;
+                    }
 
                     if (current.completed) {
                         restoreCompletedTaskToTodo(task.id);
@@ -443,15 +514,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const renderTodoList = () => {
                 todoList.innerHTML = '';
-                const items = getTodoTasksForCurrentGroup().sort((a, b) => b.id - a.id);
+                const dashboard = isInProgressDashboard();
+                const items = dashboard
+                    ? getInProgressTasksAcrossGroups().sort((a, b) => b.id - a.id)
+                    : getTodoTasksForCurrentGroup().sort((a, b) => b.id - a.id);
                 if (items.length === 0) {
                     const empty = document.createElement('li');
                     empty.className = 'no-todo-item';
-                    empty.textContent = '현재 그룹에 할 일이 없습니다.';
+                    empty.textContent = dashboard ? '진행중인 할 일이 없습니다.' : '현재 그룹에 할 일이 없습니다.';
                     todoList.appendChild(empty);
                     return;
                 }
-                items.forEach(task => todoList.appendChild(createTodoElement(task)));
+                items.forEach(task => todoList.appendChild(createTodoElement(task, { dashboardMode: dashboard })));
             };
 
             const renderCompletedList = () => {
@@ -534,17 +608,21 @@ document.addEventListener('DOMContentLoaded', () => {
             // render / 전체
             const renderAll = () => {
                 ensureGroups();
+                toggleDashboardSections();
                 renderGroups();
                 updateGroupMoveButtons();
                 renderTodoList();
-                renderCompletedList();
-                renderTrash();
                 updateProgressBar();
+                if (!isInProgressDashboard()) {
+                    renderCompletedList();
+                    renderTrash();
+                }
             };
 
             // events
             // events / 입력
             const addTask = () => {
+                if (isInProgressDashboard()) return;
                 const text = todoInput.value.trim();
                 if (!text) {
                     displayErrorMessage('할 일을 입력해주세요!');
@@ -568,10 +646,11 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const switchGroupByOffset = (offset) => {
-                if (!groups.length) return;
-                const currentIndex = Math.max(0, groups.findIndex(group => group.id === currentGroupId));
-                const nextIndex = (currentIndex + offset + groups.length) % groups.length;
-                currentGroupId = groups[nextIndex].id;
+                const visibleGroups = getVisibleGroups();
+                if (!visibleGroups.length) return;
+                const currentIndex = Math.max(0, visibleGroups.findIndex(group => group.id === currentGroupId));
+                const nextIndex = (currentIndex + offset + visibleGroups.length) % visibleGroups.length;
+                currentGroupId = visibleGroups[nextIndex].id;
                 renderAll();
             };
 
@@ -662,6 +741,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderAll();
             };
             removeGroupBtn.onclick = () => {
+                if (isInProgressDashboard()) {
+                    displayErrorMessage('진행중 그룹은 삭제할 수 없습니다.');
+                    return;
+                }
                 if (groups.length === 1) {
                     displayErrorMessage('마지막 그룹은 삭제할 수 없습니다.');
                     return;
