@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const groupPanel = document.getElementById('group-panel');
             const trashContainer = document.querySelector('.trash-container');
             const trashTitle = trashContainer ? trashContainer.querySelector('h2') : null;
+            const trashToggleState = trashTitle ? trashTitle.querySelector('.trash-toggle-state') : null;
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
             const progressCount = document.getElementById('progress-count');
@@ -66,6 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!trashContainer || !trashTitle) return;
                 trashContainer.classList.toggle('collapsed', collapsed);
                 trashTitle.setAttribute('aria-expanded', String(!collapsed));
+                if (trashToggleState) {
+                    trashToggleState.textContent = collapsed ? '닫힘' : '열림';
+                }
             };
 
             const moveCurrentGroup = (offset) => {

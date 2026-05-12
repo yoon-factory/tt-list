@@ -501,6 +501,7 @@
 
         .trash-container {
             margin: auto auto 0;
+            transition: padding 0.2s ease, min-height 0.2s ease;
         }
 
         .completed-container h2,
@@ -515,13 +516,26 @@
             user-select: none;
             display: inline-flex;
             align-items: center;
-            gap: 0;
+            gap: 8px;
             transition: color 0.2s ease;
+        }
+
+        .trash-toggle-state {
+            font-size: 0.62em;
+            color: #6f6f6f;
+            letter-spacing: 0.02em;
+            font-weight: 700;
         }
 
         .trash-container.collapsed #trash-list,
         .trash-container.collapsed .trash-toolbar {
             display: none;
+        }
+
+        .trash-container.collapsed {
+            padding-top: 16px;
+            padding-bottom: 16px;
+            min-height: 0;
         }
 
         .trash-container.collapsed h2 {
@@ -646,7 +660,7 @@
     </div>
 
     <div class="trash-container collapsed">
-        <h2>휴지통 목록</h2>
+        <h2>휴지통 목록 <span class="trash-toggle-state">닫힘</span></h2>
         <ul id="trash-list"></ul>
         <div class="trash-toolbar">
             <div class="trash-actions">
