@@ -41,8 +41,8 @@
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             width: min(calc(100% - 48px), 750px);
-            margin-top: 30px;
-            margin-bottom: 24px;
+            margin-top: 24px;
+            margin-bottom: 20px;
             padding: 24px;
             display: flex;
             flex-direction: column;
@@ -53,8 +53,8 @@
         .todo-toolbar {
             display: flex;
             justify-content: flex-end;
-            width: 100%;
-            margin-bottom: 14px;
+            width: auto;
+            margin-bottom: 0;
         }
 
         .todo-toolbar button {
@@ -89,11 +89,11 @@
         .header-top {
             position: relative;
             width: 100%;
-            min-height: 48px;
+            min-height: 52px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             box-sizing: border-box;
         }
 
@@ -137,12 +137,12 @@
 
         .dashboard-shortcut {
             position: absolute;
-            left: 4px;
+            right: 4px;
             top: 50%;
             transform: translateY(-50%);
             margin-bottom: 0;
             display: flex;
-            justify-content: flex-start;
+            justify-content: flex-end;
         }
 
         .dashboard-shortcut-btn {
@@ -657,7 +657,7 @@
             background-color: #1e1e1e;
             border-radius: 12px;
             width: min(calc(100% - 48px), 750px);
-            margin: 0 auto 24px;
+            margin: 0 auto 20px;
             padding: 24px;
             display: flex;
             flex-direction: column;
@@ -670,6 +670,7 @@
             transition: padding 0.2s ease, min-height 0.2s ease;
         }
 
+        .todo-container h2,
         .completed-container h2,
         .trash-container h2 {
             color: #888;
@@ -822,8 +823,11 @@
     </div>
 
     <div class="todo-container">
-        <div class="todo-toolbar">
-            <button id="move-all-todo-completed-btn" type="button">완료 보관함 보내기</button>
+        <div class="panel-header">
+            <h2>할일 목록</h2>
+            <div class="todo-toolbar">
+                <button id="move-all-todo-completed-btn" type="button">완료 보관함 보내기</button>
+            </div>
         </div>
         <ul id="todo-list"></ul>
     </div>
