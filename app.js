@@ -20,6 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
             const progressCount = document.getElementById('progress-count');
+            const dashboardShortcutBtn = document.getElementById('dashboard-shortcut-btn');
+            const dashboardShortcutCount = document.getElementById('dashboard-shortcut-count');
             const clockTitle = document.getElementById('clock-title');
             const moveGroupLeftBtn = document.getElementById('move-group-left-btn');
             const moveGroupRightBtn = document.getElementById('move-group-right-btn');
@@ -38,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const DEFAULT_GROUP_COUNT = 10;
             const DASHBOARD_GROUP_ID = 'in-progress';
             const DASHBOARD_GROUP_NAME = '진행중';
-            const GROUP_SWITCH_REPEAT_DELAY = 180;
+            const GROUP_SWITCH_REPEAT_DELAY = 140;
 
             // data
             let nextTodoId = 1;
@@ -57,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const setGroups = () => localStorage.setItem(STORAGE_GROUPS, JSON.stringify(groups));
             const getTaskById = (taskId) => getAllTasks().find(task => task.id === taskId);
             const isInProgressDashboard = () => currentGroupId === DASHBOARD_GROUP_ID;
-            const getVisibleGroups = () => [{ id: DASHBOARD_GROUP_ID, name: DASHBOARD_GROUP_NAME }, ...groups];
             const getGroupNameById = (groupId) => {
                 const group = groups.find((item) => item.id === groupId);
                 return group ? group.name : '알 수 없음';
@@ -193,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const renderGroups = () => {
                 Array.from(groupPanel.querySelectorAll('.group-btn, .group-edit-input')).forEach(btn => btn.remove());
                 const actionContainer = document.querySelector('.group-action-buttons');
-                getVisibleGroups().forEach(group => {
+                groups.forEach(group => {
                     const btn = document.createElement('button');
                     btn.className = 'group-btn';
                     if (group.id === currentGroupId) btn.classList.add('active');
@@ -202,10 +203,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         currentGroupId = group.id;
                         renderAll();
                     };
-                    if (group.id === DASHBOARD_GROUP_ID) {
-                        groupPanel.insertBefore(btn, actionContainer);
-                        return;
-                    }
                     btn.ondblclick = (e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -218,6 +215,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
                     groupPanel.insertBefore(btn, actionContainer);
                 });
+            };
+
+            const renderDashboardShortcut = () => {
+                if (dashboardShortcutBtn) {
+                    dashboardShortcutBtn.classList.toggle('active', isInProgressDashboard());
+                }
+                if (dashboardShortcutCount) {
+                    dashboardShortcutCount.textContent = String(getInProgressTasksAcrossGroups().length);
+                }
             };
 
             const makeGroupEditable = (buttonElement, group) => {
@@ -623,6 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const renderAll = () => {
                 ensureGroups();
                 toggleDashboardSections();
+                renderDashboardShortcut();
                 renderGroups();
                 updateGroupMoveButtons();
                 renderTodoList();
@@ -660,15 +667,25 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const switchGroupByOffset = (offset) => {
-                const visibleGroups = getVisibleGroups();
-                if (!visibleGroups.length) return;
-                const currentIndex = Math.max(0, visibleGroups.findIndex(group => group.id === currentGroupId));
-                const nextIndex = (currentIndex + offset + visibleGroups.length) % visibleGroups.length;
-                currentGroupId = visibleGroups[nextIndex].id;
+                if (!groups.length) return;
+                if (currentGroupId === DASHBOARD_GROUP_ID) {
+                    currentGroupId = offset > 0 ? groups[0].id : groups[groups.length - 1].id;
+                    renderAll();
+                    return;
+                }
+                const currentIndex = Math.max(0, groups.findIndex(group => group.id === currentGroupId));
+                const nextIndex = (currentIndex + offset + groups.length) % groups.length;
+                currentGroupId = groups[nextIndex].id;
                 renderAll();
             };
 
             addTodoBtn.onclick = addTask;
+            if (dashboardShortcutBtn) {
+                dashboardShortcutBtn.onclick = () => {
+                    currentGroupId = DASHBOARD_GROUP_ID;
+                    renderAll();
+                };
+            }
             todoInput.onkeypress = (e) => {
                 if (e.key === 'Enter') addTask();
             };
@@ -682,7 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.addEventListener('keydown', (e) => {
                 if (e.target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
                 if (e.target && e.target.isContentEditable) return;
-                if ((e.key === '1' || e.key === '2') && e.repeat) {
+                if ((e.key === '1' || e.key === '3') && e.repeat) {
                     const now = Date.now();
                     if (now - lastGroupSwitchAt < GROUP_SWITCH_REPEAT_DELAY) {
                         e.preventDefault();
@@ -695,6 +712,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     switchGroupByOffset(-1);
                 }
                 if (e.key === '2') {
+                    e.preventDefault();
+                    lastGroupSwitchAt = Date.now();
+                    currentGroupId = DASHBOARD_GROUP_ID;
+                    renderAll();
+                }
+                if (e.key === '3') {
                     e.preventDefault();
                     lastGroupSwitchAt = Date.now();
                     switchGroupByOffset(1);
