@@ -50,6 +50,29 @@
             border: 1px solid #333;
         }
 
+        .todo-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+            margin-bottom: 14px;
+        }
+
+        .todo-toolbar button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.82em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            color: #000;
+            background-color: #03dac6;
+        }
+
+        .todo-toolbar button:hover {
+            background-color: #47e4d6;
+        }
+
         .fixed-header {
             background-color: #1e1e1e;
             border-radius: 12px;
@@ -662,6 +685,9 @@
     </div>
 
     <div class="todo-container">
+        <div class="todo-toolbar">
+            <button id="move-all-todo-completed-btn" type="button">완료 보관함 보내기</button>
+        </div>
         <ul id="todo-list"></ul>
     </div>
 

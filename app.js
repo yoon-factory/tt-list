@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const todoInput = document.getElementById('todo-input');
             const addTodoBtn = document.getElementById('add-todo-btn');
             const todoList = document.getElementById('todo-list');
+            const moveAllTodoCompletedBtn = document.getElementById('move-all-todo-completed-btn');
             const completedList = document.getElementById('completed-list');
             const moveAllCompletedToTrashBtn = document.getElementById('move-all-completed-to-trash-btn');
             const trashList = document.getElementById('trash-list');
@@ -37,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const DEFAULT_GROUP_COUNT = 10;
             const DASHBOARD_GROUP_ID = 'in-progress';
             const DASHBOARD_GROUP_NAME = '진행중';
+            const GROUP_SWITCH_REPEAT_DELAY = 180;
 
             // data
             let nextTodoId = 1;
@@ -45,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let groups = [];
             let currentGroupId = 1;
             let editingTodoId = null;
+            let lastGroupSwitchAt = 0;
 
             // 저장 / 복원 헬퍼
             const getAllTasks = () => JSON.parse(localStorage.getItem(STORAGE_ALL) || '[]');
@@ -250,6 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (progressInfo) progressInfo.style.display = 'flex';
                 if (progressSection) progressSection.style.display = 'flex';
                 if (groupActionButtons) groupActionButtons.style.display = dashboard ? 'none' : 'flex';
+                if (moveAllTodoCompletedBtn) moveAllTodoCompletedBtn.style.display = dashboard ? 'none' : 'inline-block';
             };
 
             // mutations
@@ -294,6 +298,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 completedTasks.push({ ...tasks[index] });
                 tasks.splice(index, 1);
                 setAllTasks(tasks);
+                setCompletedTasks(completedTasks);
+            };
+
+            const moveAllCompletedTodoItemsToCompletedList = () => {
+                const tasks = getAllTasks();
+                const items = tasks.filter(task => task.groupId === currentGroupId && task.completed);
+                if (items.length === 0) return;
+                const completedIds = new Set(items.map(task => task.id));
+                completedTasks.push(...items.map(task => ({ ...task })));
+                setAllTasks(tasks.filter(task => !completedIds.has(task.id)));
                 setCompletedTasks(completedTasks);
             };
 
@@ -658,17 +672,31 @@ document.addEventListener('DOMContentLoaded', () => {
             todoInput.onkeypress = (e) => {
                 if (e.key === 'Enter') addTask();
             };
+            if (moveAllTodoCompletedBtn) {
+                moveAllTodoCompletedBtn.onclick = () => {
+                    moveAllCompletedTodoItemsToCompletedList();
+                    renderAll();
+                };
+            }
 
             document.addEventListener('keydown', (e) => {
-                if (e.repeat) return;
                 if (e.target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
                 if (e.target && e.target.isContentEditable) return;
+                if ((e.key === '1' || e.key === '2') && e.repeat) {
+                    const now = Date.now();
+                    if (now - lastGroupSwitchAt < GROUP_SWITCH_REPEAT_DELAY) {
+                        e.preventDefault();
+                        return;
+                    }
+                }
                 if (e.key === '1') {
                     e.preventDefault();
+                    lastGroupSwitchAt = Date.now();
                     switchGroupByOffset(-1);
                 }
                 if (e.key === '2') {
                     e.preventDefault();
+                    lastGroupSwitchAt = Date.now();
                     switchGroupByOffset(1);
                 }
             });
