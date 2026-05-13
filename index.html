@@ -214,12 +214,22 @@
         }
 
         /* Group Panel Styling */
+        .group-section {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 12px 14px 14px;
+            border: 1px solid #2f2f2f;
+            border-radius: 14px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.01));
+            box-sizing: border-box;
+        }
+
         .group-panel {
             display: flex;
             gap: 12px;
             width: 100%;
-            margin-bottom: 6px;
-            justify-content: center;
+            margin-bottom: 0;
+            justify-content: flex-start;
             align-items: flex-start;
             flex-wrap: wrap;
         }
@@ -260,11 +270,13 @@
             align-items: center;
             gap: 6px; /* 버튼 사이 간격 */
             margin-left: 0;
-            margin-top: 4px;
+            margin-top: 0;
+            margin-bottom: 10px;
             flex-wrap: nowrap;
             flex-shrink: 0;
             flex-basis: 100%;
             justify-content: center;
+            order: -1;
         }
 
         .group-order-buttons {
@@ -740,14 +752,16 @@
             </div>
             <span id="progress-text">0% 완료</span>
         </div>
-        <div class="group-panel" id="group-panel">
-            <div class="group-action-buttons">
-                <div class="group-order-buttons">
-                    <button id="move-group-left-btn" type="button" aria-label="현재 그룹을 왼쪽으로 이동">←</button>
-                    <button id="move-group-right-btn" type="button" aria-label="현재 그룹을 오른쪽으로 이동">→</button>
+        <div class="group-section">
+            <div class="group-panel" id="group-panel">
+                <div class="group-action-buttons">
+                    <div class="group-order-buttons">
+                        <button id="move-group-left-btn" type="button" aria-label="현재 그룹을 왼쪽으로 이동">←</button>
+                        <button id="move-group-right-btn" type="button" aria-label="현재 그룹을 오른쪽으로 이동">→</button>
+                    </div>
+                    <button id="add-group-btn">+ 그룹 추가</button>
+                    <button id="remove-group-btn">- 그룹 제거</button>
                 </div>
-                <button id="add-group-btn">+ 그룹 추가</button>
-                <button id="remove-group-btn">- 그룹 제거</button>
             </div>
         </div>
         <div class="input-section">
