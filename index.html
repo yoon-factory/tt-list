@@ -150,22 +150,26 @@
             align-items: center;
             gap: 12px;
             padding: 10px 14px;
-            border: 1px solid #1b6e66;
+            border: 1px solid #237f75;
             border-radius: 12px;
-            background: linear-gradient(135deg, rgba(3, 218, 198, 0.18), rgba(3, 218, 198, 0.08));
-            color: #b7fff8;
+            background: linear-gradient(135deg, rgba(3, 218, 198, 0.24), rgba(3, 218, 198, 0.11));
+            color: #d5fffa;
             cursor: pointer;
-            transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+            transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .dashboard-shortcut-btn:hover {
-            background: linear-gradient(135deg, rgba(3, 218, 198, 0.24), rgba(3, 218, 198, 0.12));
-            border-color: #2db9ac;
+            background: linear-gradient(135deg, rgba(3, 218, 198, 0.32), rgba(3, 218, 198, 0.16));
+            border-color: #39c3b6;
+            box-shadow: 0 12px 26px rgba(0, 0, 0, 0.22);
         }
 
         .dashboard-shortcut-btn.active {
             border-color: #03dac6;
-            box-shadow: 0 0 0 1px rgba(3, 218, 198, 0.28);
+            background: linear-gradient(135deg, rgba(3, 218, 198, 0.38), rgba(3, 218, 198, 0.16));
+            box-shadow: 0 0 0 1px rgba(3, 218, 198, 0.28), 0 14px 30px rgba(3, 218, 198, 0.12);
+            transform: translateY(-1px);
         }
 
         .dashboard-shortcut-label {
@@ -182,10 +186,11 @@
             height: 30px;
             padding: 0 10px;
             border-radius: 999px;
-            background-color: rgba(9, 42, 39, 0.82);
-            color: #9af5ec;
+            background-color: rgba(8, 52, 48, 0.92);
+            color: #d8fffb;
             font-size: 0.82em;
             font-weight: 800;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
 
         .progress-container {
@@ -310,7 +315,7 @@
 
         #add-group-btn,
         #remove-group-btn {
-            min-width: 92px;
+            min-width: 72px;
             min-height: 40px;
             border-radius: 8px;
         }
@@ -382,14 +387,34 @@
             flex-shrink: 0;
         }
 
+        .panel-header {
+            position: relative;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            width: 100%;
+            min-height: 40px;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+
+        .panel-header h2 {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 0;
+            margin-top: 0;
+            text-align: center;
+        }
+
         .completed-toolbar,
         .trash-toolbar {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             gap: 10px;
-            width: 100%;
-            margin-top: 15px;
+            width: auto;
+            margin-top: 0;
         }
 
         .completed-toolbar {
@@ -524,6 +549,26 @@
             border-color: #47e4d6;
         }
 
+        .todo-item.dashboard-mode {
+            background: linear-gradient(135deg, rgba(7, 46, 43, 0.95), rgba(20, 35, 34, 0.98));
+            border-color: #255b56;
+            box-shadow: inset 0 1px 0 rgba(145, 255, 241, 0.04), 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .todo-item.dashboard-mode:hover {
+            background: linear-gradient(135deg, rgba(10, 57, 53, 0.96), rgba(24, 39, 38, 0.99));
+            border-color: #2f7d75;
+        }
+
+        .todo-item.dashboard-mode .todo-item-text {
+            color: #d8fffb;
+            font-weight: 700;
+        }
+
+        .todo-item.dashboard-mode .todo-item-datetime {
+            color: #8fc1bc;
+        }
+
         .todo-item.completed .todo-item-text,
         .todo-item.completed .todo-item-datetime {
             color: #aef6ee;
@@ -550,6 +595,12 @@
             font-weight: 700;
             letter-spacing: 0.01em;
             flex-shrink: 0;
+        }
+
+        .todo-item.dashboard-mode .todo-item-group-badge {
+            background: rgba(3, 218, 198, 0.14);
+            border: 1px solid rgba(3, 218, 198, 0.28);
+            color: #9df6ed;
         }
 
         .todo-item input[type="checkbox"] {
@@ -653,7 +704,7 @@
             min-height: 0;
         }
 
-        .trash-container.collapsed h2 {
+        .trash-container.collapsed .panel-header {
             margin-bottom: 0;
         }
 
@@ -759,8 +810,8 @@
                         <button id="move-group-left-btn" type="button" aria-label="현재 그룹을 왼쪽으로 이동">←</button>
                         <button id="move-group-right-btn" type="button" aria-label="현재 그룹을 오른쪽으로 이동">→</button>
                     </div>
-                    <button id="add-group-btn">+ 그룹 추가</button>
-                    <button id="remove-group-btn">- 그룹 제거</button>
+                    <button id="add-group-btn">추가</button>
+                    <button id="remove-group-btn">제거</button>
                 </div>
             </div>
         </div>
@@ -778,25 +829,29 @@
     </div>
 
     <div class="completed-container">
-        <h2>완료 보관함</h2>
-        <ul id="completed-list"></ul>
-        <div class="completed-toolbar">
-            <div class="completed-actions">
-                <button id="move-all-completed-to-trash-btn" type="button">휴지통 보내기</button>
+        <div class="panel-header">
+            <h2>완료 보관함</h2>
+            <div class="completed-toolbar">
+                <div class="completed-actions">
+                    <button id="move-all-completed-to-trash-btn" type="button">휴지통 보내기</button>
+                </div>
             </div>
         </div>
+        <ul id="completed-list"></ul>
     </div>
 
     <div class="trash-container collapsed">
-        <h2>휴지통 목록 <span class="trash-toggle-state">닫힘</span></h2>
-        <ul id="trash-list"></ul>
-        <div class="trash-toolbar">
-            <div class="trash-actions">
-                <button id="backup-btn" type="button">백업</button>
-                <button id="restore-btn" type="button">복원</button>
+        <div class="panel-header">
+            <h2>휴지통 목록 <span class="trash-toggle-state">닫힘</span></h2>
+            <div class="trash-toolbar">
+                <div class="trash-actions">
+                    <button id="backup-btn" type="button">백업</button>
+                    <button id="restore-btn" type="button">복원</button>
+                </div>
+                <button id="clear-trash-btn">모두 비우기</button>
             </div>
-            <button id="clear-trash-btn">모두 비우기</button>
         </div>
+        <ul id="trash-list"></ul>
     </div>
 
         <script src="app.js"></script>

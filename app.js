@@ -380,6 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const { dashboardMode = false } = options;
                 const li = document.createElement('li');
                 li.className = 'todo-item';
+                if (dashboardMode) li.classList.add('dashboard-mode');
                 li.dataset.id = task.id;
                 li.dataset.originalDate = task.date || '';
                 if (task.selectedForDelete) li.classList.add('selected-for-delete');
@@ -541,7 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (items.length === 0) {
                     const empty = document.createElement('li');
                     empty.className = 'no-todo-item';
-                    empty.textContent = dashboard ? '진행중인 할 일이 없습니다.' : '현재 그룹에 할 일이 없습니다.';
+                    empty.textContent = dashboard ? '진행중인 항목이 없습니다.' : '할 일이 없습니다.';
                     todoList.appendChild(empty);
                     return;
                 }
@@ -557,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (items.length === 0) {
                     const empty = document.createElement('li');
                     empty.className = 'no-todo-item';
-                    empty.textContent = '완료 보관함이 비어 있습니다.';
+                    empty.textContent = '보관된 항목이 없습니다.';
                     completedList.appendChild(empty);
                     return;
                 }
